@@ -1,0 +1,189 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>WebAR - Đền, chùa Khánh Vân</title>
+
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111;
+    }
+
+    #message {
+      position: fixed;
+      top: 12px;
+      left: 10px;
+      right: 10px;
+      z-index: 10;
+      padding: 13px;
+      color: white;
+      background: rgba(0, 0, 0, 0.75);
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    #videoBox {
+      display: none;
+      position: fixed;
+      left: 5%;
+      right: 5%;
+      bottom: 18px;
+      z-index: 20;
+      padding: 12px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 3px 15px #0005;
+    }
+
+    #videoBox h3 {
+      margin: 3px 0 10px;
+      text-align: center;
+      color: #633d18;
+    }
+
+    video {
+      width: 100%;
+      max-height: 45vh;
+      border-radius: 8px;
+      background: black;
+    }
+
+    a-scene {
+      position: fixed;
+      inset: 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="message">
+    Hướng camera vào ảnh Đền, chùa Khánh Vân để quét
+  </div>
+
+  <div id="videoBox">
+    <h3 id="videoTitle"></h3>
+
+    <video id="video1" controls playsinline preload="metadata">
+      <source src="./videos/gioi-thieu.mp4" type="video/mp4">
+    </video>
+
+    <video id="video2" controls playsinline preload="metadata">
+      <source src="./videos/le-hoi-va-lich-su.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <a-scene
+    mindar-image="imageTargetSrc: ./targets.mind; autoStart: true;"
+    color-space="sRGB"
+    renderer="colorManagement: true"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false">
+
+    <a-camera
+      position="0 0 0"
+      look-controls="enabled: false">
+    </a-camera>
+
+    <!-- Ảnh nhận diện thứ nhất -->
+    <a-entity
+      id="target1"
+      mindar-image-target="targetIndex: 0">
+    </a-entity>
+
+    <!-- Ảnh nhận diện thứ hai -->
+    <a-entity
+      id="target2"
+      mindar-image-target="targetIndex: 1">
+    </a-entity>
+
+  </a-scene>
+
+  <script>
+    const message = document.getElementById("message");
+    const videoBox = document.getElementById("videoBox");
+    const videoTitle = document.getElementById("videoTitle");
+
+    const video1 = document.getElementById("video1");
+    const video2 = document.getElementById("video2");
+
+    let activeTarget = null;
+
+    function showVideo(index) {
+      video1.pause();
+      video2.pause();
+
+      video1.style.display = "none";
+      video2.style.display = "none";
+
+      activeTarget = index;
+      videoBox.style.display = "block";
+
+      if (index === 0) {
+        videoTitle.textContent =
+          "Giới thiệu Đền, chùa Khánh Vân";
+
+        video1.style.display = "block";
+
+        message.textContent =
+          "Đã nhận diện ảnh 1! Nhấn Play để xem video giới thiệu.";
+      }
+
+      if (index === 1) {
+        videoTitle.textContent =
+          "Lễ hội và giá trị lịch sử";
+
+        video2.style.display = "block";
+
+        message.textContent =
+          "Đã nhận diện ảnh 2! Nhấn Play để xem video lễ hội và lịch sử.";
+      }
+    }
+
+    function hideVideo(index) {
+      if (activeTarget !== index) return;
+
+      video1.pause();
+      video2.pause();
+
+      videoBox.style.display = "none";
+      activeTarget = null;
+
+      message.textContent =
+        "Hướng camera vào ảnh Đền, chùa Khánh Vân để quét";
+    }
+
+    const target1 = document.getElementById("target1");
+    const target2 = document.getElementById("target2");
+
+    target1.addEventListener("targetFound", () => {
+      showVideo(0);
+    });
+
+    target1.addEventListener("targetLost", () => {
+      hideVideo(0);
+    });
+
+    target2.addEventListener("targetFound", () => {
+      showVideo(1);
+    });
+
+    target2.addEventListener("targetLost", () => {
+      hideVideo(1);
+    });
+  </script>
+
+</body>
+</html>
